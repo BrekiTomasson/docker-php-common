@@ -1,23 +1,6 @@
 ARG DEBIAN_FRONTEND=noninteractive
 
-# note: look at devilbox php-fpm for inspiration as for structure
-
-#############################################################################
-### Using PHP 7.3 as a base for this, since most of the things we will be ###
-### using this container (and other containers based on it) will be heavy ###
-### on PHP usage. That said, there's an argument to be made for a similar ###
-### "base" container with a NodeJS base - and maybe one with just the OS, ###
-### most important tools and so on - no languages.                        ###
-#############################################################################
-
 FROM php:7.3
-
-#############################################################################
-### Since we'll be downloading a couple of files and such during the next ###
-### few steps, let's put ourselves in /tmp for now, then we have a folder ###
-### to nuke once we are done with all of the steps required for this part ###
-### of the installation process.                                          ###
-#############################################################################
 
 WORKDIR /tmp
 
@@ -83,15 +66,9 @@ RUN curl -sL https://deb.nodesource.com/setup_11.x -o nodesource_setup.sh \
 #############################################################################
 
 RUN docker-php-ext-install \
-      mbstring \
-      pdo \
-      tokenizer \
-      xml \
-      pcntl \
       bcmath \
       bz2 \
       dba \
-      zip \
       exif \
       fileinfo \
       gd \
@@ -109,8 +86,19 @@ RUN docker-php-ext-install \
       soap \
       sockets \
       tokenizer \
+      xml \
       xmlrpc \
-      xmlwriter
+      xmlwriter \
+      zip
+
+#############################################################################
+### Let's get the Redis extension installed as well, because that thing's ###
+### going to be plenty useful in several projects of ours, and we are not ###
+### really going to notice it being there for the projects where we don't ###
+### need it. Win-win scenario, my friend.                                 ###
+#############################################################################
+
+RUN pecl install redis && docker-php-ext-enable redis
 
 #############################################################################
 ### We're also going to need to install Composer so that we can get those ###
