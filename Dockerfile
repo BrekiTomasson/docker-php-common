@@ -104,19 +104,8 @@ RUN curl -s http://getcomposer.org/installer | php && \
 ### we're about to get done.                                              ###
 #############################################################################
 
-RUN composer global require     \
-  friendsofphp/php-cs-fixer     \
-  phpunit/phpunit               \
-  phpunit/php-code-coverage     \
-  matt-allan/laravel-code-style \
-  friendsofphp/php-cs-fixer     \
-  hirak/prestissimo             \
-  --sort-packages               \
-  --optimize-autoloader         \
-&& npm install --global \
-  eslint                \
-  jest                  \
-  eslint-config-breki
+RUN composer global require friendsofphp/php-cs-fixer matt-allan/laravel-code-style friendsofphp/php-cs-fixer hirak/prestissimo --sort-packages --optimize-autoloader \
+ && npm install --global eslint jest eslint-config-breki
 
 #############################################################################
 ### We're coming up on the end here so there's really only one more thing ###
