@@ -1,6 +1,6 @@
-ARG DEBIAN_FRONTEND=noninteractive
-
 FROM php:7.3
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /tmp
 
@@ -13,10 +13,11 @@ WORKDIR /tmp
 ### or something like that. Again, something to decide in the future.     ###
 #############################################################################
 
-RUN apt-get update \
- && apt-get -y install \
+RUN apt update \
+ && apt install -q -y \
       apt-utils \
       curl \
+      dialog \
       gifsicle \
       git \
       imagemagick \
@@ -44,17 +45,18 @@ RUN apt-get update \
       sqlite \
       sqlite3 \
       supervisor \
+      unzip \
       vim \
       wget \
       zlib1g-dev
 
 #############################################################################
 ### Debian packages an ancient version of Node, so let's make things more ###
-### modern by downloading and installing Node v11 instead. That should be ###
+### modern by downloading and installing Node v12 instead. That should be ###
 ### a bit more useful to us, don't you think?                             ###
 #############################################################################
 
-RUN curl -sL https://deb.nodesource.com/setup_11.x -o nodesource_setup.sh \
+RUN curl -sL https://deb.nodesource.com/setup_12.x -o nodesource_setup.sh \
   && bash nodesource_setup.sh \
   && apt install nodejs
 
@@ -70,35 +72,20 @@ RUN docker-php-ext-install \
       bz2 \
       dba \
       exif \
-      fileinfo \
       gd \
-      json \
-      mbstring \
       mysqli \
       pcntl \
-      pdo \
       pdo_mysql \
       pdo_pgsql \
-      pdo_sqlite \
       pgsql \
       phar \
-      session \
       soap \
       sockets \
-      tokenizer \
       xml \
       xmlrpc \
-      xmlwriter \
-      zip
-
-#############################################################################
-### Let's get the Redis extension installed as well, because that thing's ###
-### going to be plenty useful in several projects of ours, and we are not ###
-### really going to notice it being there for the projects where we don't ###
-### need it. Win-win scenario, my friend.                                 ###
-#############################################################################
-
-RUN pecl install redis && docker-php-ext-enable redis
+      zip \
+ && pecl install redis \
+ && docker-php-ext-enable redis
 
 #############################################################################
 ### We're also going to need to install Composer so that we can get those ###
@@ -117,11 +104,19 @@ RUN curl -s http://getcomposer.org/installer | php && \
 ### we're about to get done.                                              ###
 #############################################################################
 
-RUN composer global require hirak/prestissimo
-
-RUN composer global require friendsofphp/php-cs-fixer
-
-RUN npm install --global eslint 
+RUN composer global require     \
+  friendsofphp/php-cs-fixer     \
+  phpunit/phpunit               \
+  phpunit/php-code-coverage     \
+  matt-allan/laravel-code-style \
+  friendsofphp/php-cs-fixer     \
+  hirak/prestissimo             \
+  --sort-packages               \
+  --optimize-autoloader         \
+&& npm install --global \
+  eslint                \
+  jest                  \
+  eslint-config-breki
 
 #############################################################################
 ### We're coming up on the end here so there's really only one more thing ###
