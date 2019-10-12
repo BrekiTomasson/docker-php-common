@@ -44,10 +44,12 @@ RUN apt update && apt install -y \
       libcurl4-openssl-dev \
       libedit-dev \
       libfreetype6-dev \
+      libgmp-dev \
       libicu-dev \
       libjpeg-dev \
       libjpeg62-turbo-dev \
       libkrb5-dev \
+      libldap2-dev \
       libmagickwand-dev \
       libncurses5-dev \
       libpng-dev \
@@ -57,11 +59,13 @@ RUN apt update && apt install -y \
       libsqlite3-dev \
       libssl-dev \
       libtidy-dev \
+      libwebp-dev \
       libxml2-dev \
       libxslt-dev \
       libz-dev \
       libzip-dev \
       nano \
+      netcat \
       optipng \
       pngquant \
       procps \
@@ -85,8 +89,9 @@ RUN apt update && apt install -y \
 #############################################################################
 
 RUN docker-php-ext-configure gd \
-      --with-freetype-dir=/usr/include/ \
-      --with-jpeg-dir=/usr/include/ \
+    --with-freetype-dir=/usr/include/ \
+    --with-webp-dir=/usr/include/ \
+    --with-jpeg-dir=/usr/include/ \
  && docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd \
  && docker-php-ext-install -j$(nproc) bcmath    \
  && docker-php-ext-install -j$(nproc) bz2       \
@@ -94,6 +99,7 @@ RUN docker-php-ext-configure gd \
  && docker-php-ext-install -j$(nproc) dba       \
  && docker-php-ext-install -j$(nproc) exif      \
  && docker-php-ext-install -j$(nproc) gd        \
+ && docker-php-ext-install -j$(nproc) gmp       \
  && docker-php-ext-install -j$(nproc) intl      \
  && docker-php-ext-install -j$(nproc) mysqli    \
  && docker-php-ext-install -j$(nproc) opcache   \
