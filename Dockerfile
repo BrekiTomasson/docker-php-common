@@ -1,40 +1,64 @@
 FROM php:7.3
 
-ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND noninteractive
+ENV TERM            xterm-256color
+ENV XDEBUG_VERSION  2.8.0beta2
 
-WORKDIR /tmp
+#############################################################################
+### This command fixes a couple of the annoyances that appear when you're ### 
+### using a Debian-based system as your base image - which the PHP images ###
+### do. It instructs debconf to store an answer for what frontend to use, ###
+### replying 'Noninteractive' to each question. This is going to remove a ###
+### whole lot of warnings and potential error messages that you would see ###
+### when building your Docker images. Why this is not automaticaly picked ###
+### up on by Debian when it sees that it's being deployed in a container, ###
+### I will never know...                                                  ###
+#############################################################################
+
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 #############################################################################
 ### Step the first, installing all the core tools and things we need from ###
-### APT. There are a number of things in here that are included because   ###
-### they are good to have, but over time it's quite likely that I'll move ###
-### them from here to whatever container needs them - especially if there ###
-### are packages installed here that only get used in one other container ###
-### or something like that. Again, something to decide in the future.     ###
+### APT. There are a number of things in here that are included because I ###
+### enjoy having them around, even if I rarely use them. Several of these ###
+### will most likely be removed from this listing down the line, as I get ###
+### more clever about them and move the dependency to the required Docker ###
+### container that needs it rather than having it here in the base image. ###
 #############################################################################
 
-RUN apt update \
- && apt install -q -y \
+
+WORKDIR /tmp
+
+RUN apt update && apt install -y \
       apt-utils \
+      automake \
+      build-essential \
       curl \
       dialog \
       gifsicle \
       git \
       imagemagick \
       jpegoptim \
+      libbz2-dev \
+      libc-client-dev \
       libcurl4-openssl-dev \
       libedit-dev \
       libfreetype6-dev \
       libicu-dev \
       libjpeg-dev \
+      libjpeg62-turbo-dev \
+      libkrb5-dev \
       libmagickwand-dev \
-      libmcrypt-dev \
-      libmemcached-dev \
+      libncurses5-dev \
       libpng-dev \
       libpq-dev \
+      libpq-dev \
+      libpspell-dev \
       libsqlite3-dev \
       libssl-dev \
+      libtidy-dev \
       libxml2-dev \
+      libxslt-dev \
       libz-dev \
       libzip-dev \
       nano \
@@ -48,7 +72,95 @@ RUN apt update \
       unzip \
       vim \
       wget \
-      zlib1g-dev
+      zlib1g-dev \
+ && apt autoremove -y -q \
+ && apt-get clean \
+ && rm -r /var/lib/apt/lists/* 
+
+#############################################################################
+### docker-php-ext-install is a great tool for when it comes to getting a ###
+### PHP extension installed on a docker-container. It can be so much work ###
+### just go get them installed - but this little tool takes the hard work ###
+### out of your hands and just Gets. Things. Done.                        ###
+#############################################################################
+
+RUN docker-php-ext-configure gd \
+      --with-freetype-dir=/usr/include/ \
+      --with-jpeg-dir=/usr/include/ \
+ && docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd \
+ && docker-php-ext-install -j$(nproc) bcmath    \
+ && docker-php-ext-install -j$(nproc) bz2       \
+ && docker-php-ext-install -j$(nproc) calendar  \
+ && docker-php-ext-install -j$(nproc) dba       \
+ && docker-php-ext-install -j$(nproc) exif      \
+ && docker-php-ext-install -j$(nproc) gd        \
+ && docker-php-ext-install -j$(nproc) intl      \
+ && docker-php-ext-install -j$(nproc) mysqli    \
+ && docker-php-ext-install -j$(nproc) opcache   \
+ && docker-php-ext-install -j$(nproc) pcntl     \
+ && docker-php-ext-install -j$(nproc) pdo_mysql \
+ && docker-php-ext-install -j$(nproc) pdo_pgsql \
+ && docker-php-ext-install -j$(nproc) pgsql     \
+ && docker-php-ext-install -j$(nproc) phar      \
+ && docker-php-ext-install -j$(nproc) pspell    \
+ && docker-php-ext-install -j$(nproc) shmop     \
+ && docker-php-ext-install -j$(nproc) soap      \
+ && docker-php-ext-install -j$(nproc) sockets   \
+ && docker-php-ext-install -j$(nproc) sysvmsg   \
+ && docker-php-ext-install -j$(nproc) sysvsem   \
+ && docker-php-ext-install -j$(nproc) sysvshm   \
+ && docker-php-ext-install -j$(nproc) tidy      \
+ && docker-php-ext-install -j$(nproc) xml       \
+ && docker-php-ext-install -j$(nproc) xmlrpc    \
+ && docker-php-ext-install -j$(nproc) zip
+
+
+#############################################################################
+### Despite how amazing docker-php-ext-install is, it does not have every ###
+### single thing that we want to install here, so we are going to have to ###
+### install some  things using tools like PECL or good ol'e fashioned URL ###
+### downloading, uncompressing, installing and moving things around. Join ###
+### me, it'll be fun!                                                     ###
+#############################################################################
+
+# It wouldn't be a proper development environment if it didn't have XDebug #
+# installed, so it makes sense that this is where we begin. Unfortunately, #
+# XDebug comes at a pretty significant performance loss, so it will not be #
+# enabled by default - so a Docker based on this image is going to have to #
+# enable it from within itself. See the README for more information on how #
+# this is done.
+
+RUN pecl install xdebug && docker-php-ext-enable xdebug
+
+# Serialization and unserialization of data isn't very sexy, but it is a #
+# very important part of what a language does. Unfortunately, the native #
+# serialize method in PHP is slow and takes a lot of space, so we want a #
+# way to do this better. Enter Igbinary, a serializer that can make your #
+# serialized data take around 50% less space, and is often faster, too!  #
+
+RUN pecl install igbinary && docker-php-ext-enable igbinary
+
+# Redis is everywhere nowadays, and Predis comes with a pretty significant #
+# performance loss. So; we are going to be installing the native extension #
+# ext-redis so that we can connect to Redis in a much more convenient way. #
+
+RUN pecl install redis && docker-php-ext-enable redis
+
+# PHP Code Sniffer isn't something you need in all your installations, but #
+# I find it better to have it available when you need it rather than being #
+# forced to find it and install it when the time comes that you decide you #
+# want to have it around. And it's not a massive extra size requirement to #
+# strain the container with - at least not when we have all of these other #
+# things installed already.                                                #
+
+RUN curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar \
+    && chmod 755 phpcs.phar \
+    && mv phpcs.phar /usr/local/bin/ \
+    && ln -s /usr/local/bin/phpcs.phar /usr/local/bin/phpcs \
+    && curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar \
+    && chmod 755 phpcbf.phar \
+    && mv phpcbf.phar /usr/local/bin/ \
+    && ln -s /usr/local/bin/phpcbf.phar /usr/local/bin/phpcbf
 
 #############################################################################
 ### Debian packages an ancient version of Node, so let's make things more ###
@@ -61,42 +173,23 @@ RUN curl -sL https://deb.nodesource.com/setup_12.x -o nodesource_setup.sh \
   && apt install nodejs
 
 #############################################################################
-### docker-php-ext-install is a great tool for when it comes to getting a ###
-### PHP extension installed on a docker-container. It can be so much work ###
-### just go get them installed - but this little tool takes the hard work ###
-### out of your hands and just Gets. Things. Done.                        ###
-#############################################################################
-
-RUN docker-php-ext-install \
-      bcmath \
-      bz2 \
-      dba \
-      exif \
-      gd \
-      mysqli \
-      pcntl \
-      pdo_mysql \
-      pdo_pgsql \
-      pgsql \
-      phar \
-      soap \
-      sockets \
-      xml \
-      xmlrpc \
-      zip \
- && pecl install redis \
- && docker-php-ext-enable redis
-
-#############################################################################
 ### We're also going to need to install Composer so that we can get those ###
 ### third party PHP packages installed - instead of copying them all into ###
 ### a container, we want to just copy the composer.json file and have the ###
 ### docker container install the packages for us.                         ###
 #############################################################################
 
-RUN curl -s http://getcomposer.org/installer | php && \
-  echo "export PATH=${PATH}:/var/www/vendor/bin" >> ~/.bashrc && \
-  mv composer.phar /usr/local/bin/composer
+RUN curl -sS http://getcomposer.org/installer | php \
+ && echo "export PATH=${PATH}:~/.composer/vendor/bin" >> ~/.bashrc \
+ && echo "export PATH=${PATH}:/var/www/vendor/bin" >> ~/.bashrc \
+ && mv composer.phar /usr/local/bin/composer \
+ && composer self-update 
+
+# Composer and XDebug don't play very nice with each other, so we want to #
+# disable XDebug from interfering with whatever it is Composer decides to #
+# do. Down the line, we might add more exceptions to this list as well.   #
+
+RUN sed -i "s/zend_extension=/#zend_extension=/g" /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 #############################################################################
 ### Last, but not least, we install a few of global packages from NPM and ###
@@ -104,8 +197,19 @@ RUN curl -s http://getcomposer.org/installer | php && \
 ### we're about to get done.                                              ###
 #############################################################################
 
-RUN composer global require friendsofphp/php-cs-fixer matt-allan/laravel-code-style friendsofphp/php-cs-fixer hirak/prestissimo --sort-packages --optimize-autoloader \
- && npm install --global eslint jest eslint-config-breki
+RUN composer global require hirak/prestissimo --no-plugins --no-scripts --prefer-dist
+
+# And once Prestissimo is in, let's get the other ones!
+
+RUN composer global require \
+      friendsofphp/php-cs-fixer \
+      matt-allan/laravel-code-style \
+      friendsofphp/php-cs-fixer \
+      phpunit/phpunit \
+      localheinz/composer-normalize \
+      --no-plugins --no-scripts --prefer-dist
+
+# No global packages from NPM as of yet. Watch this space! #
 
 #############################################################################
 ### We're coming up on the end here so there's really only one more thing ###
@@ -114,7 +218,9 @@ RUN composer global require friendsofphp/php-cs-fixer matt-allan/laravel-code-st
 ### we really don't have much to remove or clean out.                     ###
 #############################################################################
 
-RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
+RUN rm -rf /var/lib/apt/lists/* /usr/share/doc/* \
   && rm /var/log/lastlog /var/log/faillog \
+  && apt-get autoremove -y \
+  && rm -rf /tmp/* /var/tmp/* \
   && apt-get clean \
   && chmod -R 777 /tmp
