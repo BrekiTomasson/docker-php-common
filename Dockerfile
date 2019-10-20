@@ -5,7 +5,7 @@ ENV TERM            xterm-256color
 ENV XDEBUG_VERSION  2.8.0beta2
 
 #############################################################################
-### This command fixes a couple of the annoyances that appear when you're ### 
+### This command fixes a couple of the annoyances that appear when you're ###
 ### using a Debian-based system as your base image - which the PHP images ###
 ### do. It instructs debconf to store an answer for what frontend to use, ###
 ### replying 'Noninteractive' to each question. This is going to remove a ###
@@ -79,7 +79,7 @@ RUN apt update && apt install -y \
       zlib1g-dev \
  && apt autoremove -y -q \
  && apt-get clean \
- && rm -r /var/lib/apt/lists/* 
+ && rm -r /var/lib/apt/lists/*
 
 #############################################################################
 ### docker-php-ext-install is a great tool for when it comes to getting a ###
@@ -138,6 +138,13 @@ RUN docker-php-ext-configure gd \
 
 RUN pecl install xdebug && docker-php-ext-enable xdebug
 
+# We want to enable ImageMagick as well, as it is used by several of the #
+# packages that we will be requiring from Packagist. And just like we've #
+# seen with XDebug already, this is another one of those that we need to #
+# get through PECL before enabling it with docker-php-ext-enable.        #
+
+RUN pecl install imagick && docker-php-ext-enable imagick
+
 # Serialization and unserialization of data isn't very sexy, but it is a #
 # very important part of what a language does. Unfortunately, the native #
 # serialize method in PHP is slow and takes a lot of space, so we want a #
@@ -189,7 +196,7 @@ RUN curl -sS http://getcomposer.org/installer | php \
  && echo "export PATH=${PATH}:~/.composer/vendor/bin" >> ~/.bashrc \
  && echo "export PATH=${PATH}:/var/www/vendor/bin" >> ~/.bashrc \
  && mv composer.phar /usr/local/bin/composer \
- && composer self-update 
+ && composer self-update
 
 # Composer and XDebug don't play very nice with each other, so we want to #
 # disable XDebug from interfering with whatever it is Composer decides to #
