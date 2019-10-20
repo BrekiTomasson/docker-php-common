@@ -35,6 +35,7 @@ RUN apt update && apt install -y \
       build-essential \
       curl \
       dialog \
+      gcc \
       gifsicle \
       git \
       imagemagick \
@@ -59,14 +60,17 @@ RUN apt update && apt install -y \
       libsqlite3-dev \
       libssl-dev \
       libtidy-dev \
+      libtiff-dev \
       libwebp-dev \
       libxml2-dev \
       libxslt-dev \
       libz-dev \
       libzip-dev \
+      make \
       nano \
       netcat \
       optipng \
+      pkgconf \
       pngquant \
       procps \
       python3 \
@@ -143,7 +147,11 @@ RUN pecl install xdebug && docker-php-ext-enable xdebug
 # seen with XDebug already, this is another one of those that we need to #
 # get through PECL before enabling it with docker-php-ext-enable.        #
 
-RUN pecl install imagick && docker-php-ext-enable imagick
+RUN git clone https://github.com/ImageMagick/ImageMagick.git && \
+        cd ImageMagick && git checkout 7.0.8-68 && \
+        ./configure && make && make install && \
+        cd ../ && \
+        rm -rf ./ImageMagick
 
 # Serialization and unserialization of data isn't very sexy, but it is a #
 # very important part of what a language does. Unfortunately, the native #
