@@ -4,6 +4,8 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM            xterm-256color
 ENV XDEBUG_VERSION  2.8.0beta2
 
+ADD https://raw.githubusercontent.com/mlocati/docker-php-extension-installer/master/install-php-extensions /usr/local/bin/
+
 #############################################################################
 ### This command fixes a couple of the annoyances that appear when you're ###
 ### using a Debian-based system as your base image - which the PHP images ###
@@ -66,6 +68,7 @@ RUN apt update && apt install -y \
       libxslt-dev \
       libz-dev \
       libzip-dev \
+      locales \
       make \
       nano \
       netcat \
@@ -85,80 +88,37 @@ RUN apt update && apt install -y \
  && apt-get clean \
  && rm -r /var/lib/apt/lists/*
 
-#############################################################################
-### docker-php-ext-install is a great tool for when it comes to getting a ###
-### PHP extension installed on a docker-container. It can be so much work ###
-### just go get them installed - but this little tool takes the hard work ###
-### out of your hands and just Gets. Things. Done.                        ###
-#############################################################################
+# Instead of docker-php-ext-install, we're using a new and improved #
+# piece of software called install-php-extensions - very nice! It's #
+# pretty much the same as docker-php-ext-install but it's got a few #
+# extra bells and whistles that we can enjoy.                       #
 
-RUN docker-php-ext-configure gd --with-gd --with-freetype-dir=/usr/include/ --with-png-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
- && docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd \
- && docker-php-ext-install -j$(nproc) bcmath    \
- && docker-php-ext-install -j$(nproc) bz2       \
- && docker-php-ext-install -j$(nproc) calendar  \
- && docker-php-ext-install -j$(nproc) dba       \
- && docker-php-ext-install -j$(nproc) exif      \
- && docker-php-ext-install -j$(nproc) gd        \
- && docker-php-ext-install -j$(nproc) gmp       \
- && docker-php-ext-install -j$(nproc) intl      \
- && docker-php-ext-install -j$(nproc) mysqli    \
- && docker-php-ext-install -j$(nproc) opcache   \
- && docker-php-ext-install -j$(nproc) pcntl     \
- && docker-php-ext-install -j$(nproc) pdo_mysql \
- && docker-php-ext-install -j$(nproc) pdo_pgsql \
- && docker-php-ext-install -j$(nproc) pgsql     \
- && docker-php-ext-install -j$(nproc) phar      \
- && docker-php-ext-install -j$(nproc) pspell    \
- && docker-php-ext-install -j$(nproc) shmop     \
- && docker-php-ext-install -j$(nproc) soap      \
- && docker-php-ext-install -j$(nproc) sockets   \
- && docker-php-ext-install -j$(nproc) sysvmsg   \
- && docker-php-ext-install -j$(nproc) sysvsem   \
- && docker-php-ext-install -j$(nproc) sysvshm   \
- && docker-php-ext-install -j$(nproc) tidy      \
- && docker-php-ext-install -j$(nproc) xml       \
- && docker-php-ext-install -j$(nproc) xmlrpc    \
- && docker-php-ext-install -j$(nproc) zip
-
-
-#############################################################################
-### Despite how amazing docker-php-ext-install is, it does not have every ###
-### single thing that we want to install here, so we are going to have to ###
-### install some  things using tools like PECL or good ol'e fashioned URL ###
-### downloading, uncompressing, installing and moving things around. Join ###
-### me, it'll be fun!                                                     ###
-#############################################################################
-
-# It wouldn't be a proper development environment if it didn't have XDebug #
-# installed, so it makes sense that this is where we begin. Unfortunately, #
-# XDebug comes at a pretty significant performance loss, so it will not be #
-# enabled by default - so a Docker based on this image is going to have to #
-# enable it from within itself. See the README for more information on how #
-# this is done.
-
-RUN pecl install xdebug && docker-php-ext-enable xdebug
-
-# We want to enable ImageMagick as well, as it is used by several of the #
-# packages that we will be requiring from Packagist. And just like we've #
-# seen with XDebug already, this is another one of those that we need to #
-# get through PECL before enabling it with docker-php-ext-enable.        #
-
-RUN pecl install imagick && docker-php-ext-enable imagick
-
-# Serialization and unserialization of data isn't very sexy, but it is a #
-# very important part of what a language does. Unfortunately, the native #
-# serialize method in PHP is slow and takes a lot of space, so we want a #
-# way to do this better. Enter Igbinary, a serializer that can make your #
-# serialized data take around 50% less space, and is often faster, too!  #
-
-RUN pecl install igbinary && docker-php-ext-enable igbinary
-
-# Redis is everywhere nowadays, and Predis comes with a pretty significant #
-# performance loss. So; we are going to be installing the native extension #
-# ext-redis so that we can connect to Redis in a much more convenient way. #
-
-RUN pecl install redis && docker-php-ext-enable redis
+RUN chmod uga+x /usr/local/bin/install-php-extensions \
+ && sync \
+ && install-php-extensions \
+     xdebug \
+     imagick \
+     igbinary \
+     redis \
+     bcmath \
+     bz2 \
+     dba \
+     exif \
+     gmp \
+     intl \
+     mysqli \
+     pcntl \
+     pdo_mysql \
+     pdo_pgsql \
+     pgsql \
+     phar \
+     pspell \
+     soap \
+     sockets \
+     xml \
+     xmlrpc \
+     gd \
+     zip
 
 # PHP Code Sniffer isn't something you need in all your installations, but #
 # I find it better to have it available when you need it rather than being #
