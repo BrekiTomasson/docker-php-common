@@ -147,11 +147,7 @@ RUN pecl install xdebug && docker-php-ext-enable xdebug
 # seen with XDebug already, this is another one of those that we need to #
 # get through PECL before enabling it with docker-php-ext-enable.        #
 
-RUN git clone https://github.com/ImageMagick/ImageMagick.git && \
-        cd ImageMagick && git checkout 7.0.8-68 && \
-        ./configure && make && make install && \
-        cd ../ && \
-        rm -rf ./ImageMagick
+RUN pecl install imagick && docker-php-ext-enable imagick
 
 # Serialization and unserialization of data isn't very sexy, but it is a #
 # very important part of what a language does. Unfortunately, the native #
