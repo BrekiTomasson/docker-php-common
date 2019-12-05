@@ -1,4 +1,4 @@
-FROM php:7.3
+FROM php:7.4
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM            xterm-256color
@@ -57,7 +57,6 @@ RUN apt update && apt install -y \
       libncurses5-dev \
       libpng-dev \
       libpq-dev \
-      libpq-dev \
       libpspell-dev \
       libsqlite3-dev \
       libssl-dev \
@@ -96,29 +95,32 @@ RUN apt update && apt install -y \
 RUN chmod uga+x /usr/local/bin/install-php-extensions \
  && sync \
  && install-php-extensions \
-     xdebug \
-     imagick \
-     igbinary \
-     redis \
-     bcmath \
-     bz2 \
-     dba \
-     exif \
-     gmp \
-     intl \
-     mysqli \
-     pcntl \
-     pdo_mysql \
-     pdo_pgsql \
-     pgsql \
-     phar \
-     pspell \
-     soap \
-     sockets \
-     xml \
-     xmlrpc \
-     gd \
-     zip
+
+      gd         \
+      pdo        \
+      pdo_mysql  \
+      pdo_sqlite \
+      zip        \
+      gmp        \
+      bcmath     \
+      pcntl      \
+      ldap       \
+      sysvmsg    \
+      exif       \
+      xdebug     \
+      imagick    \
+      igbinary   \
+      redis      \
+      bz2        \
+      dba        \
+      intl       \
+      mysqli     \
+      pgsql      \
+      phar       \
+      soap       \
+      sockets    \
+      xml        \
+      xmlrpc
 
 # PHP Code Sniffer isn't something you need in all your installations, but #
 # I find it better to have it available when you need it rather than being #
