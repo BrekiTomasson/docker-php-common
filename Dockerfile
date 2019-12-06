@@ -110,7 +110,7 @@ RUN apt update && apt install -y \
 #############################################################################
 
 RUN docker-php-ext-configure gd --enable-gd --with-webp --with-jpeg --with-xpm --with-freetype \
- && docker-php-ext-configure zip --with-libzip
+ && docker-php-ext-configure zip --with-zip
 
 RUN chmod uga+x /usr/local/bin/install-php-extensions \
  && sync \
