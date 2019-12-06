@@ -97,7 +97,6 @@ RUN chmod uga+x /usr/local/bin/install-php-extensions \
  && install-php-extensions \
       pdo_mysql  \
       pdo_pgsql  \
-      zip        \
       gmp        \
       bcmath     \
       pcntl      \
@@ -108,6 +107,7 @@ RUN chmod uga+x /usr/local/bin/install-php-extensions \
       imagick    \
       igbinary   \
       redis      \
+      zip        \
       bz2        \
       dba        \
       intl       \
