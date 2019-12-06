@@ -95,11 +95,8 @@ RUN apt update && apt install -y \
 RUN chmod uga+x /usr/local/bin/install-php-extensions \
  && sync \
  && install-php-extensions \
-
-      gd         \
-      pdo        \
       pdo_mysql  \
-      pdo_sqlite \
+      pdo_pgsql  \
       zip        \
       gmp        \
       bcmath     \
@@ -116,11 +113,12 @@ RUN chmod uga+x /usr/local/bin/install-php-extensions \
       intl       \
       mysqli     \
       pgsql      \
-      phar       \
       soap       \
       sockets    \
-      xml        \
       xmlrpc
+
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+ && docker-php-ext-install -j$(nproc) gd
 
 # PHP Code Sniffer isn't something you need in all your installations, but #
 # I find it better to have it available when you need it rather than being #
