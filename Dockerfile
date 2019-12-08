@@ -1,8 +1,43 @@
 FROM php:7.4
 
+MAINTAINER Breki Tomasson <breki.tomasson@gmail.com>
+
+#############################################################################
+##                                                                         ##
+##  Welcome to the Dockerfile; I hope you'll be enjoying your stay! We'll  ##
+##  be setting up a PHP 7.4 environment here that is suitable for various  ##
+##  different tasks, mainly aimed towards running a small PHP server with  ##
+##  a particular purpose. This is **not** intended to be your primary web  ##
+##  server, however, but more along the line of a smaller server inside a  ##
+##  greater whole - think websocket server, job runner, or something like  ##
+##  that. If you're looking for a more standard web server instead, there  ##
+##  are plenty of other great Docker containers out there for you to use.  ##
+##                                                                         ##
+##  Everything we do is going to be fairly well documented along the way,  ##
+##  with more lines in this file being dedicated to documentation instead  ##
+##  of actual Docker commands to run. In future versions of the container  ##
+##  there will be features that allow you to turn on or off various parts  ##
+##  of it, but at the moment the entire thing is all-or-nothing.           ##
+##                                                                         ##
+#############################################################################
+
+
+### Environment Variables and Locales ###
+
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM            xterm-256color
 ENV XDEBUG_VERSION  2.8.0beta2
+
+RUN apt-get update                       \
+ && apt-get install -y locales           \
+ && dpkg-reconfigure locales             \
+ && locale-gen C.UTF-8                   \
+ && /usr/sbin/update-locale LANG=C.UTF-8
+
+ENV LC_ALL          C.UTF-8
+ENV LANG            en_US.UTF-8
+ENV LANGUAGE        en_US.UTF-8
+
 
 #############################################################################
 ##                                                                         ##
@@ -138,9 +173,7 @@ RUN chmod uga+x /usr/local/bin/install-php-extensions \
       sockets    \
       xmlrpc
 
-###
-### Insert comment on PHP Code Sniffer here. ### 
-###
+### I really like PHP Code Sniffer, so let's include that as well. ### 
 
 RUN curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar      \
     && chmod 755 phpcs.phar                                              \
@@ -215,8 +248,8 @@ RUN composer global require hirak/prestissimo \
       npx                           \
       tldr                          \
       fkill                         \
-      vtop                          \
       eslint                        \
+      eslint-config-breki           \
       prettier
 
 #############################################################################
