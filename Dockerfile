@@ -24,6 +24,8 @@ MAINTAINER Breki Tomasson <breki.tomasson@gmail.com>
 
 ### Environment Variables and Locales ###
 
+USER root
+
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM            xterm-256color
 ENV XDEBUG_VERSION  2.8.0beta2
@@ -39,6 +41,7 @@ ENV LANG            en_US.UTF-8
 ENV LANGUAGE        en_US.UTF-8
 
 
+
 #############################################################################
 ##                                                                         ##
 ##  This first command installs 'install-php-extensions', which we use to  ##
@@ -48,6 +51,8 @@ ENV LANGUAGE        en_US.UTF-8
 #############################################################################
 
 ADD https://raw.githubusercontent.com/mlocati/docker-php-extension-installer/master/install-php-extensions /usr/local/bin/
+
+
 
 #############################################################################
 ##                                                                         ##
@@ -64,6 +69,8 @@ ADD https://raw.githubusercontent.com/mlocati/docker-php-extension-installer/mas
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
+
+
 #############################################################################
 ##                                                                         ##
 ##  Step the first, installing all the core tools and things we need from  ##
@@ -75,7 +82,6 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 ##                                                                         ##
 #############################################################################
 
-
 WORKDIR /tmp
 
 RUN apt update && apt install -y \
@@ -84,6 +90,7 @@ RUN apt update && apt install -y \
       build-essential            \
       curl                       \
       dialog                     \
+      exiftool                   \
       gcc                        \
       gifsicle                   \
       git                        \
@@ -144,11 +151,13 @@ RUN apt update && apt install -y \
 ##                                                                         ##
 #############################################################################
 
-RUN docker-php-ext-configure gd --enable-gd --with-webp --with-jpeg --with-xpm --with-freetype \
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-configure zip --with-zip
 
 RUN chmod uga+x /usr/local/bin/install-php-extensions \
- && sync \
+ && sync                   \
+ && apt update -y          \
+ && apt upgrade -y         \
  && install-php-extensions \
       pdo_mysql  \
       pdo_pgsql  \
@@ -231,26 +240,20 @@ RUN sed -i "s/zend_extension=/#zend_extension=/g" /usr/local/etc/php/conf.d/dock
 ##                                                                         ##
 #############################################################################
 
-RUN composer global require hirak/prestissimo \
-      --no-plugins                            \
-      --no-scripts                            \
-      --prefer-dist                           \
+RUN composer global require hirak/prestissimo --no-suggest --no-progress \
  && composer global require         \
       friendsofphp/php-cs-fixer     \
       matt-allan/laravel-code-style \
       friendsofphp/php-cs-fixer     \
       phpunit/phpunit               \
-      localheinz/composer-normalize \
-      --no-plugins                  \
-      --no-scripts                  \
+      ergebnis/composer-normalize   \
+      --no-suggest                  \
+      --no-progress                 \
       --prefer-dist                 \
- && npm install --global            \
-      npx                           \
-      tldr                          \
-      fkill                         \
-      eslint                        \
-      eslint-config-breki           \
-      prettier
+      --optimize-autoloader
+
+# --> Note: No global packages from NPM added here yet. Is there anything <--
+# -->       relevant we should be adding here?                            <--
 
 #############################################################################
 ##                                                                         ##
