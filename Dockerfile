@@ -1,4 +1,4 @@
-FROM php:7.4
+FROM php:7.4.15
 
 MAINTAINER Breki Tomasson <breki.tomasson@gmail.com>
 
@@ -12,6 +12,10 @@ MAINTAINER Breki Tomasson <breki.tomasson@gmail.com>
 ##  greater whole - think websocket server, job runner, or something like  ##
 ##  that. If you're looking for a more standard web server instead, there  ##
 ##  are plenty of other great Docker containers out there for you to use.  ##
+##                                                                         ##
+##  Absolutely no consideration has been given to making this image small  ##
+##  or well optimized. We are still in a getting things to work-mode, and  ##
+##  all of that nice stuff will hve to come at a later date.               ##
 ##                                                                         ##
 ##  Everything we do is going to be fairly well documented along the way,  ##
 ##  with more lines in this file being dedicated to documentation instead  ##
@@ -40,8 +44,6 @@ ENV LC_ALL          C.UTF-8
 ENV LANG            en_US.UTF-8
 ENV LANGUAGE        en_US.UTF-8
 
-
-
 #############################################################################
 ##                                                                         ##
 ##  This first command installs 'install-php-extensions', which we use to  ##
@@ -51,8 +53,6 @@ ENV LANGUAGE        en_US.UTF-8
 #############################################################################
 
 ADD https://raw.githubusercontent.com/mlocati/docker-php-extension-installer/master/install-php-extensions /usr/local/bin/
-
-
 
 #############################################################################
 ##                                                                         ##
@@ -69,11 +69,9 @@ ADD https://raw.githubusercontent.com/mlocati/docker-php-extension-installer/mas
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
-
-
 #############################################################################
 ##                                                                         ##
-##  Step the first, installing all the core tools and things we need from  ##
+##  Step the first: Installing all the core tools and things we need from  ##
 ##  APT. There are a number of things in here that are included because I  ##
 ##  enjoy having them around, even if I rarely use them. Several of these  ##
 ##  will most likely be removed from this listing down the line, as I get  ##
@@ -182,7 +180,7 @@ RUN chmod uga+x /usr/local/bin/install-php-extensions \
       sockets    \
       xmlrpc
 
-### I really like PHP Code Sniffer, so let's include that as well. ### 
+### I really like PHP Code Sniffer, so let's include that as well. ###
 
 RUN curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar      \
     && chmod 755 phpcs.phar                                              \
@@ -196,12 +194,12 @@ RUN curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar      \
 #############################################################################
 ##                                                                         ##
 ##  Debian packages an ancient version of Node, so let's make things more  ##
-##  modern by downloading and installing Node v12 instead. That should be  ##
+##  modern by downloading and installing Node v15 instead. That should be  ##
 ##  a bit more useful to us, don't you think?                              ##
 ##                                                                         ##
 #############################################################################
 
-RUN curl -sL https://deb.nodesource.com/setup_12.x -o nodesource_setup.sh  \
+RUN curl -sL https://deb.nodesource.com/setup_15.x -o nodesource_setup.sh  \
   && bash nodesource_setup.sh                                              \
   && apt install nodejs
 
@@ -235,19 +233,15 @@ RUN sed -i "s/zend_extension=/#zend_extension=/g" /usr/local/etc/php/conf.d/dock
 ##                                                                         ##
 ##  Last, but not least, we install a few of global packages from NPM and  ##
 ##  Composer that will be of use to us in whatever development work it is  ##
-##  we're about to get done. We install Prestissimo first, as it makes it  ##
-##  more elegant when we're installing the remaining packages.             ##
+##  we're about to get done.                                               ##
 ##                                                                         ##
 #############################################################################
 
-RUN composer global require hirak/prestissimo --no-suggest --no-progress \
- && composer global require         \
+RUN composer global require         \
       friendsofphp/php-cs-fixer     \
       matt-allan/laravel-code-style \
-      friendsofphp/php-cs-fixer     \
       phpunit/phpunit               \
       ergebnis/composer-normalize   \
-      --no-suggest                  \
       --no-progress                 \
       --prefer-dist                 \
       --optimize-autoloader
