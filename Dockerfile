@@ -1,4 +1,4 @@
-FROM php:7.4.15
+FROM php:8.0.3
 
 MAINTAINER Breki Tomasson <breki.tomasson@gmail.com>
 
@@ -141,13 +141,13 @@ RUN apt update && apt install -y \
  && rm -r /var/lib/apt/lists/*
 
 
-#############################################################################
-##                                                                         ##
-##  PHP 7.4 has introduced a couple of changes to the GD & ZIP extensions  ##
-##  so we'll add configuration through docker-php-ext-configure before we  ##
-##  can continue to install them.                                          ##
-##                                                                         ##
-#############################################################################
+##############################################################################
+##                                                                          ##
+##  PHP has introduced a couple of changes to the GD & ZIP extensions, and  ##
+##  we have to add config through docker-php-ext-configure first before we  ##
+##  can continue to install them.                                           ##
+##                                                                          ##
+##############################################################################
 
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-configure zip --with-zip
@@ -177,7 +177,6 @@ RUN chmod uga+x /usr/local/bin/install-php-extensions \
       mysqli     \
       pgsql      \
       soap       \
-      sockets    \
       xmlrpc
 
 ### I really like PHP Code Sniffer, so let's include that as well. ###

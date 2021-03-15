@@ -1,19 +1,43 @@
 # Customized PHP Docker Environment
 
-This is a PHP environment for development purposes, and contains most of the
-bells and whistles you're going to want to have when developing any of your
-PHP applications and frameworks.
+This is a PHP environment for development purposes, and contains most of the bells and whistles you're going to want to have when developing any of your PHP applications and frameworks.
 
-Note that this environment is probably not for everybody, as it contains a
-bunch of things that most people would consider to be extraneous. In future
-versions of this package, there will be environment flags that you can set
-in order to turn on or off various things, but that's not where we are now.
+Note that this environment is probably not for everybody, as it contains **a bunch** of things that most people would consider to be extraneous, useless or otherwise completely pointless to include. In some future version of this package, there will be environment flags that you can set in order to turn on or off various things, but that's not where we are now.
 
-# Settings and Options
+# Current Versions and Settings
 
-Nothing here yet. It'll show up at some point, but I'm not making any promises
-as to when that will be or what those options will be. This is still very much
-just a when-I-need-it kind of development package.
+- PHP Version: 8.0.3
+- PHP Extensions:
+  - `bcmath`
+  - `bz2`
+  - `dba`
+  - `exif`
+  - `gd`
+  - `gmp`
+  - `igbinary`
+  - `imagick`
+  - `intl`
+  - `ldap`
+  - `mysqli`
+  - `pcntl`
+  - `pdo_mysql`
+  - `pdo_pgsql`
+  - `pgsql`
+  - `redis`
+  - `soap`
+  - `sysvmsg`
+  - `xdebug`
+  - `xmlrpc`
+  - `zip`
+- Other things being installed:
+  - PHP_CodeSniffer (latest)
+  - Node (v15)
+  - Composer (latest)
+- Composer packages:
+  - `friendsofphp/php-cs-fixer`
+  - `matt-allan/laravel-code-style`
+  - `phpunit/phpunit`
+  - `ergebnis/composer-normalize`
 
 # Copyright & License
 
