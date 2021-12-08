@@ -6,7 +6,7 @@ Note that this environment is probably not for everybody, as it contains **a bun
 
 # Current Versions and Settings
 
-- PHP Version: 8.0.3
+- PHP Version: 8.1
 - PHP Extensions:
   - `bcmath`
   - `bz2`
