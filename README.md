@@ -30,8 +30,7 @@ Note that this environment is probably not for everybody, as it contains **a bun
   - `xmlrpc`
   - `zip`
 - Other things being installed:
-  - PHP_CodeSniffer (latest)
-  - Node (v15)
+  - Node (v17)
   - Composer (latest)
 - Composer packages:
   - `friendsofphp/php-cs-fixer`

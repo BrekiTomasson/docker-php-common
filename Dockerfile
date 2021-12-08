@@ -1,4 +1,4 @@
-FROM php:8.0.3
+FROM php:8.1
 
 MAINTAINER Breki Tomasson <breki.tomasson@gmail.com>
 
@@ -52,7 +52,7 @@ ENV LANGUAGE        en_US.UTF-8
 ##                                                                         ##
 #############################################################################
 
-ADD https://raw.githubusercontent.com/mlocati/docker-php-extension-installer/master/install-php-extensions /usr/local/bin/
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
 #############################################################################
 ##                                                                         ##
@@ -129,7 +129,6 @@ RUN apt update && apt install -y \
       pngquant                   \
       procps                     \
       python3                    \
-      sqlite                     \
       sqlite3                    \
       supervisor                 \
       unzip                      \
@@ -179,26 +178,15 @@ RUN chmod uga+x /usr/local/bin/install-php-extensions \
       soap       \
       xmlrpc
 
-### I really like PHP Code Sniffer, so let's include that as well. ###
-
-RUN curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar      \
-    && chmod 755 phpcs.phar                                              \
-    && mv phpcs.phar /usr/local/bin/                                     \
-    && ln -s /usr/local/bin/phpcs.phar /usr/local/bin/phpcs              \
-    && curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar  \
-    && chmod 755 phpcbf.phar                                             \
-    && mv phpcbf.phar /usr/local/bin/                                    \
-    && ln -s /usr/local/bin/phpcbf.phar /usr/local/bin/phpcbf
-
 #############################################################################
 ##                                                                         ##
 ##  Debian packages an ancient version of Node, so let's make things more  ##
-##  modern by downloading and installing Node v15 instead. That should be  ##
+##  modern by downloading and installing Node v17 instead. That should be  ##
 ##  a bit more useful to us, don't you think?                              ##
 ##                                                                         ##
 #############################################################################
 
-RUN curl -sL https://deb.nodesource.com/setup_15.x -o nodesource_setup.sh  \
+RUN curl -sL https://deb.nodesource.com/setup_17.x -o nodesource_setup.sh  \
   && bash nodesource_setup.sh                                              \
   && apt install nodejs
 
