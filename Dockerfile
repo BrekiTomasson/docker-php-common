@@ -139,7 +139,6 @@ RUN apt update && apt install -y \
  && apt-get clean                \
  && rm -r /var/lib/apt/lists/*
 
-
 ##############################################################################
 ##                                                                          ##
 ##  PHP has introduced a couple of changes to the GD & ZIP extensions, and  ##
@@ -187,8 +186,8 @@ RUN chmod uga+x /usr/local/bin/install-php-extensions \
 #############################################################################
 
 RUN curl -sL https://deb.nodesource.com/setup_17.x -o nodesource_setup.sh  \
-  && bash nodesource_setup.sh                                              \
-  && apt install nodejs
+ && bash nodesource_setup.sh                                               \
+ && apt install nodejs
 
 #############################################################################
 ##                                                                         ##
@@ -224,17 +223,27 @@ RUN sed -i "s/zend_extension=/#zend_extension=/g" /usr/local/etc/php/conf.d/dock
 ##                                                                         ##
 #############################################################################
 
-RUN composer global require         \
-      friendsofphp/php-cs-fixer     \
-      matt-allan/laravel-code-style \
-      phpunit/phpunit               \
-      ergebnis/composer-normalize   \
-      --no-progress                 \
-      --prefer-dist                 \
+RUN composer global require                    \
+      friendsofphp/php-cs-fixer                \
+      brekitomasson/php-cs-fixer-breki-config  \
+      phpunit/phpunit                          \
+      ergebnis/composer-normalize              \
+      --no-progress                            \
+      --prefer-dist                            \
       --optimize-autoloader
 
-# --> Note: No global packages from NPM added here yet. Is there anything <--
-# -->       relevant we should be adding here?                            <--
+#  Note: No global packages from NPM added here yet. Is there anything
+#        relevant we should be adding here?
+
+#############################################################################
+##                                                                         ##
+##  Some minor tweaks to the PHP configuration need to be done so that we  ##
+##  do not have to experience any limitations when it comes to stuff like  ##
+##  maximum file sizes, maximum post sizes and memory limitations.         ##
+##                                                                         ##
+#############################################################################
+
+ADD docker-vars.ini /usr/local/etc/php/conf.d/docker-vars.ini
 
 #############################################################################
 ##                                                                         ##
