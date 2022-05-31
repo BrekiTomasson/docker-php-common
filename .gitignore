@@ -2,4 +2,4 @@
 !.gitignore
 !Dockerfile
 !README.md
-
+!docker-vars.ini
