@@ -180,12 +180,12 @@ RUN chmod uga+x /usr/local/bin/install-php-extensions \
 #############################################################################
 ##                                                                         ##
 ##  Debian packages an ancient version of Node, so let's make things more  ##
-##  modern by downloading and installing Node v17 instead. That should be  ##
+##  modern by downloading and installing Node v18 instead. That should be  ##
 ##  a bit more useful to us, don't you think?                              ##
 ##                                                                         ##
 #############################################################################
 
-RUN curl -sL https://deb.nodesource.com/setup_17.x -o nodesource_setup.sh  \
+RUN curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh  \
  && bash nodesource_setup.sh                                               \
  && apt install nodejs
 
