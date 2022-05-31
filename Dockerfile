@@ -5,7 +5,7 @@ MAINTAINER Breki Tomasson <breki.tomasson@gmail.com>
 #############################################################################
 ##                                                                         ##
 ##  Welcome to the Dockerfile; I hope you'll be enjoying your stay! We'll  ##
-##  be setting up a PHP 7.4 environment here that is suitable for various  ##
+##  be setting up a PHP environment here. It will be suitable for various  ##
 ##  different tasks, mainly aimed towards running a small PHP server with  ##
 ##  a particular purpose. This is **not** intended to be your primary web  ##
 ##  server, however, but more along the line of a smaller server inside a  ##
@@ -14,7 +14,7 @@ MAINTAINER Breki Tomasson <breki.tomasson@gmail.com>
 ##  are plenty of other great Docker containers out there for you to use.  ##
 ##                                                                         ##
 ##  Absolutely no consideration has been given to making this image small  ##
-##  or well optimized. We are still in a getting things to work-mode, and  ##
+##  or well optimized. We are still in "getting things to work"-mode, and  ##
 ##  all of that nice stuff will hve to come at a later date.               ##
 ##                                                                         ##
 ##  Everything we do is going to be fairly well documented along the way,  ##
@@ -243,7 +243,7 @@ RUN composer global require                    \
 ##                                                                         ##
 #############################################################################
 
-ADD docker-vars.ini /usr/local/etc/php/conf.d/docker-vars.ini
+ADD ./docker-vars.ini /usr/local/etc/php/conf.d/docker-vars.ini
 
 #############################################################################
 ##                                                                         ##
